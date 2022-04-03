@@ -34,10 +34,10 @@ function writeManifest() {
 		})
 	};
 	"dep" === pack_type.value ? (
-		pack_download_all = !0, 
+		pack_is_dependent = !0, 
 		display_pack_element.style.display = "none"
 	) : (
-		pack_download_all = !1, 
+		pack_is_dependent = !1, 
 		display_pack_element.style.display = "block"
 	);
 	"skin_pack" === pack_type.value ? (
@@ -47,7 +47,7 @@ function writeManifest() {
 		pack_description.disabled = !1, 
 		pack_version.disabled = !1
 	);
-	!1 === pack_download_all ? (
+	!1 === pack_is_dependent ? (
 		display_element.style.display = "none", 
 		uuidgen1 = new uuid_generator_class, 
 		output = {
@@ -147,7 +147,8 @@ function writeManifest() {
 			header: {},
 			modules: [],
 			dependencies: [{}]
-		}, "" !== document.getElementById("bp.dep.name").value && (behaviorpack.header.name = document.getElementById("bp.dep.name").value), 
+		}, 
+		"" !== document.getElementById("bp.dep.name").value && (behaviorpack.header.name = document.getElementById("bp.dep.name").value), 
 		"" !== document.getElementById("bp.dep.description").value && (behaviorpack.header.description = document.getElementById("bp.dep.description").value), 
 		behaviorpack.header.uuid = uuidgen2.generate_uuid(), 
 		behaviorpack.header.version = [1, 0, 0], 
