@@ -1,11 +1,36 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <cstdio>
+#include <iostream>
 
 using namespace std;
 
 class json_value{
+private:
+	bool find_across_whitespace(string s,int ind,char c){
+		int l=s.length(),i;
+		for (i=ind;i<l;i++){
+			if (s[i]==c) return true;
+			if (s[i]!=' ') return false;
+		}
+		return false;
+	}
+	string indent_json(string s){
+		string o="";
+		int l=s.length(),i,j,indent_level=0;
+		for (i=0;i<l;i++){
+			if (s[i]=='{'||s[i]=='[') indent_level++;
+			if (s[i]=='\n'){
+				o+="\n";
+				if (i+1<l){
+					if (find_across_whitespace(s,i+1,']')||find_across_whitespace(s,i+1,'}')) indent_level--;
+				}
+				if (indent_level) o+="  ";
+			}
+			else o+=s[i];
+		}
+		return o;
+	}
 public:
 	int val_type;
 	int val_int;
@@ -33,9 +58,10 @@ public:
 		val_object=o;
 	}
 	string get_repr(){
-		if (this->val_type==0) return to_string(this->val_int);
+		string output="";
+		if (this->val_type==0) output=to_string(this->val_int);
 		else if (this->val_type==1) {
-			string output="\"";
+			output="\"";
 			int l=this->val_string.length(),i;
 			char escape[7];
 			for (i=0;i<l;i++){
@@ -74,31 +100,29 @@ public:
 				}
 			}
 			output+="\"";
-			return output;
 		}
 		else if (this->val_type==2){
 			int l=this->val_list.size(),i;
-			string list_repr="[\n";
+			output="[\n";
 			for (i=0;i<l;i++){
-				list_repr+=this->val_list[i].get_repr();
-				if (i<l-1) list_repr+=",\n";
+				output+=this->val_list[i].get_repr();
+				if (i<l-1) output+=",\n";
 			}
-			list_repr+="\n]";
-			return list_repr;
+			output+="\n]";
 		}
 		else if (this->val_type==3){
 			int o=this->val_object.size(),i=0;
-			string object_repr="{\n";
-			for (const auto &[key,valu] : this->val_object){
-				object_repr+=json_value(key).get_repr();
-				object_repr+=": ";
-				object_repr+=this->val_object[key].get_repr();
-				if (i<o-1) object_repr+=",\n";
+			output="{\n";
+			for (auto key=this->val_object.begin();key!=this->val_object.end();key++){
+				output+=json_value(key->first).get_repr();
+				output+=": ";
+				output+=key->second.get_repr();
+				if (i<o-1) output+=",\n";
 				i++;
 			}
-			object_repr+="\n}";
-			return object_repr;
+			output+="\n}";
 		}
-		return "";
+		output=indent_json(output);
+		return output;
 	}
 };
