@@ -4,6 +4,26 @@
 #include <iostream>
 
 using namespace std;
+template <typename jso>
+
+class json_object{
+public:
+	vector<pair<string,jso>> object_pair;
+	json_object(){
+		object_pair={};
+	}
+	json_object(vector<pair<string,jso>> a){
+		object_pair=a;
+	}
+	jso& operator[](string s){
+		int l=object_pair.size();
+		for (int i=0;i<l;i++){
+			if (object_pair[i].first==s) return object_pair[i].second;
+		}
+		object_pair.push_back({s,jso()});
+		return object_pair[l].second;
+	}
+};
 
 class json_value{
 private:
@@ -36,7 +56,7 @@ public:
 	int val_int;
 	string val_string;
 	vector<json_value> val_list;
-	map<string,json_value> val_object;
+	json_object<json_value> val_object;
 	json_value(){
 		val_type=0;
 		val_int=0;
@@ -53,7 +73,7 @@ public:
 		val_type=2;
 		val_list=l;
 	}
-	json_value(map<string,json_value> o){
+	json_value(json_object<json_value> o){
 		val_type=3;
 		val_object=o;
 	}
@@ -111,12 +131,12 @@ public:
 			output+="\n]";
 		}
 		else if (this->val_type==3){
-			int o=this->val_object.size(),i=0;
+			int o=this->val_object.object_pair.size(),i=0;
 			output="{\n";
-			for (auto key=this->val_object.begin();key!=this->val_object.end();key++){
-				output+=json_value(key->first).get_repr();
+			for (auto key:val_object.object_pair){
+				output+=json_value(key.first).get_repr();
 				output+=": ";
-				output+=key->second.get_repr();
+				output+=key.second.get_repr();
 				if (i<o-1) output+=",\n";
 				i++;
 			}
