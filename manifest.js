@@ -153,7 +153,9 @@ function writeManifest() {
 		behaviorpack.header.uuid = uuidgen2.generate_uuid(), 
 		behaviorpack.header.version = [1, 0, 0], 
 		"none" !== document.getElementById("bp.dep.min_engine_version").value && (behaviorpack.header.min_engine_version = JSON.parse(document.getElementById("bp.dep.min_engine_version").value)), 
-		behaviorpack.modules[0] = {}, behaviorpack.modules[0].type = "data", behaviorpack.modules[0].uuid = uuidgen2.generate_uuid(), 
+		behaviorpack.modules[0] = {}, 
+		behaviorpack.modules[0].type = "data", 
+		behaviorpack.modules[0].uuid = uuidgen2.generate_uuid(), 
 		behaviorpack.modules[0].version = [1, 0, 0], 
 		behavior_pack_enable_scripts.checked ? (
 			resource_pack_enable_ui.disabled = !1, 
@@ -242,8 +244,10 @@ function writeManifest() {
 			);
 			save_button.click()
 		}, 
-		behaviorpack.dependencies[0].uuid = resourcepack.header.uuid, behaviorpack.dependencies[0].version = resourcepack.header.version, 
-		resourcepack.dependencies[0].uuid = behaviorpack.header.uuid, resourcepack.dependencies[0].version = resourcepack.header.version, 
+		behaviorpack.dependencies[0].uuid = resourcepack.header.uuid, 
+		behaviorpack.dependencies[0].version = resourcepack.header.version, 
+		resourcepack.dependencies[0].uuid = behaviorpack.header.uuid, 
+		resourcepack.dependencies[0].version = resourcepack.header.version, 
 		resource_pack_enable_ui.checked && behavior_pack_enable_scripts.checked && (
 			resourcepack.capabilities = [], 
 			resourcepack.capabilities[0] = "experimental_custom_ui"
@@ -259,7 +263,8 @@ function writeManifest() {
 			behaviorpack.dependencies[1].uuid = "6f4b6893-1bb6-42fd-b458-7fa3d0c89616", 
 			behaviorpack.dependencies[1].version = [0, 1, 0], 
 			behavior_pack_enable_scripts.checked ? (
-				behaviorpack.modules[2] = {}, behaviorpack.modules[2].type = "javascript", 
+				behaviorpack.modules[2] = {}, 
+				behaviorpack.modules[2].type = "javascript", 
 				behaviorpack.modules[2].uuid = uuidgen2.generate_uuid(), 
 				behaviorpack.modules[2].version = [1, 0, 0], 
 				behaviorpack.modules[2].entry = "scripts/" + document.getElementById("bp.gametest.file").value
