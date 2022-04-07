@@ -131,7 +131,9 @@ function writeItem() {
 	if (document.getElementById("enable.item_atlas").checked) {
 		if (icon.value !== "") {
 			let itemAtlas = {};
-			itemAtlas.resource_pack_name = "vanilla", itemAtlas.texture_name = "atlas.items", itemAtlas.texture_data = {};
+			itemAtlas.resource_pack_name = "vanilla", 
+			itemAtlas.texture_name = "atlas.items", 
+			itemAtlas.texture_data = {};
 			if (is_valid_identifier(identifier.value)) {
 				itemAtlas.texture_data[`${identifier.value.split(":")[1].toLowerCase()}.texture`] = {};
 				itemAtlas.texture_data[`${identifier.value.split(":")[1].toLowerCase()}.texture`].textures = icon.value;
@@ -432,7 +434,13 @@ function writeItem() {
 	} else {
 		downloadPack.disabled = true;
 	};
-	if (is_valid_identifier(identifier.value) && (identifier.value.split(":")[1] !== "" && identifier.value.split(":")[0] !== "") && (document.getElementById("item.atlas").value !== "" && icon.value !== "" && document.getElementById("enable.item_atlas").value !== "")) {
+	if (is_valid_identifier(identifier.value) && 
+		(identifier.value.split(":")[1] !== "" && 
+		identifier.value.split(":")[0] !== "") && 
+		(document.getElementById("item.atlas").value !== "" 
+		&& icon.value !== "" 
+		&& document.getElementById("enable.item_atlas").value !== "")
+	) {
 		document.getElementById("item.pack").disabled = false;
 	} else {
 		document.getElementById("item.pack").disabled = true;

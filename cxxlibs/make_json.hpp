@@ -27,26 +27,11 @@ public:
 
 class json_value{
 private:
-	bool find_across_whitespace(string s,int ind,char c){
-		int l=s.length(),i;
-		for (i=ind;i<l;i++){
-			if (s[i]==c) return true;
-			if (s[i]!=' ') return false;
-		}
-		return false;
-	}
 	string indent_json(string s){
 		string o="";
 		int l=s.length(),i,j,indent_level=0;
 		for (i=0;i<l;i++){
-			if (s[i]=='{'||s[i]=='[') indent_level++;
-			if (s[i]=='\n'){
-				o+="\n";
-				if (i+1<l){
-					if (find_across_whitespace(s,i+1,']')||find_across_whitespace(s,i+1,'}')) indent_level--;
-				}
-				if (indent_level) o+="  ";
-			}
+			if (s[i]=='\n'&&i<l-2) o+="\n  ";
 			else o+=s[i];
 		}
 		return o;
@@ -54,6 +39,7 @@ private:
 public:
 	int val_type;
 	int val_int;
+	double val_float;
 	string val_string;
 	vector<json_value> val_list;
 	json_object<json_value> val_object;
@@ -76,6 +62,14 @@ public:
 	json_value(json_object<json_value> o){
 		val_type=3;
 		val_object=o;
+	}
+	json_value(bool n){
+		val_type=4;
+		val_int=n;
+	}
+	json_value(double d){
+		val_type=5;
+		val_float=d;
 	}
 	string get_repr(){
 		string output="";
@@ -141,6 +135,13 @@ public:
 				i++;
 			}
 			output+="\n}";
+		}
+		else if (this->val_type==4){
+			if (val_int) output="true";
+			else output="false";
+		}
+		else if (this->val_type==5){
+			output=to_string(val_float);
 		}
 		output=indent_json(output);
 		return output;
