@@ -14,6 +14,15 @@ private:
 		}
 		return false;
 	}
+	pair<string,string> get_idvalue(string identifier){
+		regex regex_string("([^!@#$%^&*()+\\-=\\[\\]{};'\"\\\\|,<>\\/?.:][^!@#$%^&*()+\\-=\\[\\]{};'\"\\\\|,<>\\/?]*):([^!@#$%^&*()+\\-=\\[\\]{}:;'\"\\\\|,<>\\/?]+)");
+		smatch match_string;
+		bool a=regex_match(identifier,match_string,regex_string);
+		if (a){
+			return pair<string,string>{match_string[1],match_string[2]};
+		}
+		return pair<string,string> {"",""};
+	}
 	json_value genManifest(bool select_both){
 		uuid_generator uuid;
 		json_value bp=json_value(json_object<json_value>{});
@@ -50,9 +59,29 @@ private:
 		}
 		return json_value(json_object<json_value>{{{"rp",rp},{"bp",bp}}});
 	}
+	string strippng(string filename){
+		regex regex_string("(.*)\\.png");
+		smatch match_string;
+		bool a=regex_match(filename,match_string,regex_string);
+		if (a){
+			return match_string[1].str();
+		}
+		return "";
+	}
+	string to_lower(string a){
+		int l=a.length();
+		string b;
+		for (int i=0;i<l;i++){
+			if (a[i]>64&&a[i]<91) b+=a[i]-32;
+			else b+=a[i];
+		}
+		return b;
+	}
 public:
 	json_value make(
 		string identifier,
+		file textureFile,
+		file modelFile,
 		bool isSpawnable,
 		bool isSummonable,
 		bool isExperimental,
@@ -84,6 +113,20 @@ public:
 				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["spawn_egg"].val_object["overlay_color"]=spawnEggOverlay;
 				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["spawn_egg"].val_object["base_color"]=spawnEggBase;
 			}
+			if (textureFile.filename!=""){
+				string f=this->strippng(textureFile.filename);
+				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["textures"]=json_value(json_object<json_value>{});
+				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["textures"].val_object["default"]="textures/entity/"+this->to_lower(f);
+			}
+			cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["materials"]=json_value(json_object<json_value>{});
+			cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["materials"].val_object["default"]=material;
+			if (modelFile.filename!=""){
+				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["geometry"]=json_value(json_object<json_value>{});
+				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["geometry"].val_object["default"]=this->to_lower(geoID);
+			}
+			cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["render_controllers"]=json_value(vector<json_value>{});
+			cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["render_controllers"].val_list.push_back(string("controller.render.")+this->get_idvalue(identifier).second);
+			
 			// ***************************
 			// * TO DO: Texture filename *
 			// ***************************
