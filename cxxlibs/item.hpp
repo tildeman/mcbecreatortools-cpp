@@ -13,7 +13,7 @@ string to_lower(string a){
 }
 
 class item{
-public:
+private:
 	bool verifyIdentifier(string identifier){
 		regex regex_string("([^!@#$%^&*()+\\-=\\[\\]{};'\"\\\\|,<>\\/?.:][^!@#$%^&*()+\\-=\\[\\]{};'\"\\\\|,<>\\/?]*):([^!@#$%^&*()+\\-=\\[\\]{}:;'\"\\\\|,<>\\/?]+)");
 		smatch match_string;
@@ -32,7 +32,7 @@ public:
 		}
 		return pair<string,string> {"",""};
 	}
-	string genManifest(){
+	json_value genManifest(){
 		uuid_generator uuid;
 		json_value bp=json_value(json_object<json_value>{});
 		json_value rp=json_value(json_object<json_value>{});
@@ -64,8 +64,9 @@ public:
 		rp.val_object["dependencies"].val_list[0].val_object["uuid"]=bp.val_object["header"].val_object["uuid"];
 		bp.val_object["dependencies"].val_list[0].val_object["version"]=rp.val_object["header"].val_object["version"];
 		rp.val_object["dependencies"].val_list[0].val_object["version"]=rp.val_object["header"].val_object["version"];
-		return json_value(json_object<json_value>{{{"rp",rp},{"bp",bp}}}).get_repr();
+		return json_value(json_object<json_value>{{{"rp",rp},{"bp",bp}}});
 	}
+public:
 	string writeItem(
 		string formatVersion="1.16.100",
 		string identifier="custom:item",
