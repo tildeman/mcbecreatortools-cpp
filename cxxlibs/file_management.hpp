@@ -1,8 +1,21 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <regex>
+using namespace std;
+typedef basic_string<unsigned char> bstring;
+typedef basic_fstream<unsigned char> bfstream;
 
+// ***************************************
+// * Note to self: use the std namespace *
+// ***************************************
+
+// *******************************
 // * Lookup table for file types *
+// *******************************
 // +-------------+------------+
 // | Filetype ID |  Used for  |
 // +-------------+------------+
@@ -15,82 +28,79 @@
 
 class file{
 private:
-	const char* truncate_slashes(const char* strink){
-		int l=strlen(strink),i;
-		for (i=l-1;i>-1;i--){
-			if (strink[i]=='/'||strink[i]=='\\') return strink+i+1;
+	string truncate_slashes(string strink){
+		regex regex_string(".*[\\\\\\/](.+)");
+		smatch match_string;
+		bool a=regex_match(strink,match_string,regex_string);
+		if (a){
+			return match_string[1];
 		}
 		return strink;
 	}
 public:
 	int filetype;
-	unsigned char* binary_contents;
-	char* text_contents;
-	file* directory_contents;
-	const char* filename;
-	int length;
+	bstring binary_contents;
+	string text_contents;
+	vector<file> directory_contents;
+	string filename;
 	file(){
 		this->filetype=1;
 		this->filename="";
 	}
-	file(const char* dirname,file* contents,int length){
+	file(string dirname,vector<file> contents){
 		this->filetype=2;
 		this->filename=dirname;
 		this->directory_contents=contents;
-		this->length=length;
 	}
-	file(const char* filename,const char* contents){
+	file(string filename,string contents){
 		this->filename=filename;
 		this->filetype=1;
-		this->text_contents=(char*) contents;
-		this->length=strlen(contents);
+		this->text_contents=contents;
 	}
-	void read_file(const char* filename,bool is_binary){
+	void read_file(string filename,bool is_binary){
 		if (is_binary){
+			ifstream f(filename,ios::binary);
 			this->filetype=0;
-			FILE* f=fopen(filename,"rb");
-			this->filename=this->truncate_slashes(filename);
-			fseek(f,sizeof(unsigned char),SEEK_END);
-			this->length=ftell(f)-1;
-			fseek(f,sizeof(unsigned char)*0L,SEEK_SET);
-			this->binary_contents=(unsigned char*) malloc(this->length*sizeof(unsigned char));
-			fread(this->binary_contents,sizeof *this->binary_contents,this->length,f);
+			this->filename=truncate_slashes(filename);
+			f.seekg(0,ios::end);
+			streampos length=f.tellg();
+			f.seekg(0,ios::beg);
+			this->binary_contents=bstring(length,0);
+			f.read((char*)&(this->binary_contents)[0],length);
 		}
 		else{
+			fstream f(filename,ios::in|ios::ate);
 			this->filetype=1;
-			FILE* f=fopen(filename,"rb");
-			this->filename=filename;
-			fseek(f,sizeof(char),SEEK_END);
-			this->length=ftell(f)-1;
-			fseek(f,sizeof(char)*0L,SEEK_SET);
-			this->text_contents=(char*) malloc(this->length*sizeof(char));
-			fread(this->text_contents,sizeof *this->text_contents,this->length,f);
-			this->text_contents[this->length]=0;
+			this->filename=truncate_slashes(filename);
+			f.seekg(0,ios::end);
+			streampos length=f.tellg();
+			f.seekg(0,ios::beg);
+			this->text_contents=string(length,'\0');
+			f.read(&(this->text_contents)[0],length);
 		}
 	}
 	void write_file(){
-		FILE* w;
 		if (this->filetype==0){
-			w=fopen(this->filename,"wb");
-			fwrite(this->binary_contents,sizeof *this->binary_contents,this->length,w);
+			ofstream w(filename,ios::binary);
+			w.write((char*)&(this->binary_contents)[0],this->binary_contents.length());
+			w.close();
 		}
 		else if (this->filetype==1){
-			w=fopen(this->filename,"w");
-			fwrite(this->text_contents,sizeof *this->text_contents,this->length,w);
+			ofstream w(filename);
+			w << this->text_contents;
+			w.close();
 		}
-		fclose(w);
 	}
-	char* get_repr(int indent=0){
+	string get_repr(int indent=0){
 		int i;
-		char* s=(char*) malloc(30000);
-		s[0]=0;
-		for (i=1;i<indent;i++) strcat(s,"| ");
-		if (indent) strcat(s,"|-");
-		strcat(s,this->filename);
-		strcat(s,"\n");
+		string s;
+		for (i=1;i<indent;i++) s+="| ";
+		if (indent) s+="|-";
+		s+=this->filename;
+		s+="\n";
 		if (this->filetype==2){
-			for (i=0;i<this->length;i++){
-				strcat(s,this->directory_contents[i].get_repr(indent+1));
+			for (i=0;i<this->directory_contents.size();i++){
+				s+=this->directory_contents[i].get_repr(indent+1);
 			}
 		}
 		return s;

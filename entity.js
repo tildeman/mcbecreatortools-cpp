@@ -81,24 +81,29 @@ genButton.onclick = function () {
 			var f = e[i].name.replace(".png", "");
 			cliententity["minecraft:client_entity"].description.textures = {};
 			cliententity["minecraft:client_entity"].description.textures["default"] = "textures/entity/" + f.toLowerCase();
-			"res" !== select.value && "both" !== select.value || jszobject.file("resource_pack/textures/entity/" + (f.toLowerCase() + ".png"), e[i])
+			"res" !== select.value && "both" !== select.value || jszobject.file(
+				"resource_pack/textures/entity/" + (f.toLowerCase() + ".png"), 
+				e[i]
+			)
 		}
 		cliententity["minecraft:client_entity"].description.materials = {};
 		cliententity["minecraft:client_entity"].description.materials["default"] = material.value;
 		0 < modelFile.files.length && (
 			cliententity["minecraft:client_entity"].description.geometry = {}, 
-			"res" !== select.value && "both" !== select.value || jszobject.file("resource_pack/models/entity/" + modelFile.files[0].name, 
-			modelFile.files[0]), 
+			"res" !== select.value && "both" !== select.value || jszobject.file(
+				"resource_pack/models/entity/" + modelFile.files[0].name, 
+				modelFile.files[0]
+			), 
 			cliententity["minecraft:client_entity"].description.geometry["default"] = geoID.toLowerCase()
 		);
 		cliententity["minecraft:client_entity"].description.render_controllers = [];
 		cliententity["minecraft:client_entity"].description.render_controllers[0] = "controller.render." + identifier.value.split(":")[1];
-		e = {};
+		rendercontr = {};
 		"beh" !== select.value && (0 < modelFile.files.length && 0 < textureFile.files.length 
-			? genRenderControllers(e) 
+			? genRenderControllers(rendercontr) 
 			: window.alert('Can\'t generate render controllers, missing either "geometry" or "texture"!'));
-		f = {};
-		baseBeh.checked ? genBehBasic(f) : genBehCustom(f);
+		beh = {};
+		baseBeh.checked ? genBehBasic(beh) : genBehCustom(beh);
 		"res" !== select.value && "both" !== select.value || "beh" === select.value || (
 			jszobject.file(
 				"resource_pack/manifest.json", 
@@ -114,17 +119,17 @@ genButton.onclick = function () {
 			), 
 			jszobject.file(
 				"resource_pack/render_controllers/" + identifier.value.split(":")[1] + ".render_controllers.json", 
-				JSON.stringify(e, null, 2)
+				JSON.stringify(rendercontr, null, 2)
 			)
 		);
 		"beh" !== select.value && "both" !== select.value || "res" === select.value || (
-			jszobjectfile(
+			jszobject.file(
 				"behavior_pack/manifest.json", 
 				JSON.stringify(behpack, null, 2)
 			), 
 			jszobject.file(
 				"behavior_pack/entities/" + identifier.value.split(":")[1] + ".json", 
-				JSON.stringify(f, null, 2)
+				JSON.stringify(beh, null, 2)
 			)
 		);
 		jszobject.generateAsync({

@@ -1,13 +1,23 @@
 #include "file_management.hpp"
+#include <iostream>
+using namespace std;
 
 int main(){
-	file r[]={file("sh","iet"),file("muzyka","aasasas")};
-	file s[]={file("a","moi"),file("fldr",r,2),file("b","moje")};
-	file t[]={file("ssss",s,3),file("must","fffff")};
-	file a("think",t,2);
-	printf("%s",a.get_repr());
+	file a("think",{
+		file("ssss",vector<file>{
+			file("a","moi"),
+			file("fldr",vector<file>{
+				file("sh","iet"),
+				file("muzyka","aasasas")
+			}),
+			file("b","moje")
+		}),
+		file("must","fffff")
+	});
+	cout << a.get_repr();
 
 	file b;
-	b.read_file("manifest",1);
-	printf("%s\n",b.filename);
+	b.read_file("/mnt/creatortools/entity.js",0);
+	b.write_file();
+	cout << b.filename << '\n';
 }
