@@ -1,16 +1,8 @@
 #include "make_json.hpp"
 #include "uuid_generator.hpp"
+#include "file_management.hpp"
 #include <regex>
 
-string to_lower(string a){
-	int l=a.length();
-	string b;
-	for (int i=0;i<l;i++){
-		if (a[i]>64&&a[i]<91) b+=a[i]-32;
-		else b+=a[i];
-	}
-	return b;
-}
 
 class item{
 private:
@@ -23,14 +15,23 @@ private:
 		}
 		return false;
 	}
-	pair<string,string> get_idvalue(string identifier){
+	string to_lower(string a){
+		int l=a.length();
+		string b;
+		for (int i=0;i<l;i++){
+			if (a[i]>64&&a[i]<91) b+=a[i]-32;
+			else b+=a[i];
+		}
+		return b;
+	}
+	string get_iname(string identifier){
 		regex regex_string("([^!@#$%^&*()+\\-=\\[\\]{};'\"\\\\|,<>\\/?.:][^!@#$%^&*()+\\-=\\[\\]{};'\"\\\\|,<>\\/?]*):([^!@#$%^&*()+\\-=\\[\\]{}:;'\"\\\\|,<>\\/?]+)");
 		smatch match_string;
 		bool a=regex_match(identifier,match_string,regex_string);
 		if (a){
-			return pair<string,string>{match_string[1],match_string[2]};
+			return match_string[2];
 		}
-		return pair<string,string> {"",""};
+		return "";
 	}
 	json_value genManifest(){
 		uuid_generator uuid;
@@ -66,8 +67,17 @@ private:
 		rp.val_object["dependencies"].val_list[0].val_object["version"]=rp.val_object["header"].val_object["version"];
 		return json_value(json_object<json_value>{{{"rp",rp},{"bp",bp}}});
 	}
+	string truncate_slashes(string strink){
+		regex regex_string(".*[\\\\\\/](.+)");
+		smatch match_string;
+		bool a=regex_match(strink,match_string,regex_string);
+		if (a){
+			return match_string[1];
+		}
+		return strink;
+	}
 public:
-	string writeItem(
+	file writeItem(
 		string formatVersion="1.16.100",
 		string identifier="custom:item",
 		string category="Items",
@@ -138,6 +148,7 @@ public:
 		string recordSound="",
 		int recordDuration=-1,
 		int recordSignal=-1,
+		file itemIcon=file("",""),
 		bool enable_itematlas=0
 	){
 		json_value item=json_value(json_object<json_value>{});
@@ -154,17 +165,16 @@ public:
 		item.val_object["minecraft:item"].val_object["components"]=json_value(json_object<json_value>{});
 		if (icon!=""&&verifyIdentifier(identifier)){
 			item.val_object["minecraft:item"].val_object["components"].val_object["minecraft:icon"]=json_value(json_object<json_value>{});
-			item.val_object["minecraft:item"].val_object["components"].val_object["minecraft:icon"].val_object["texture"]=to_lower(this->get_idvalue(identifier).second+".texture");
+			item.val_object["minecraft:item"].val_object["components"].val_object["minecraft:icon"].val_object["texture"]=to_lower(get_iname(identifier)+".texture");
 		}
+		json_value itemAtlas=json_value(json_object<json_value>{});
 		if (enable_itematlas&&icon!=""){
-			json_value itemAtlas=json_value(json_object<json_value>{});
 			itemAtlas.val_object["resource_pack_name"]=string("vanilla");
 			itemAtlas.val_object["texture_name"]=string("atlas.items");
 			itemAtlas.val_object["texture_data"]=json_value(json_object<json_value>{});
 			if (this->verifyIdentifier(identifier)){
-				pair<string,string> texdata=get_idvalue(identifier);
-				itemAtlas.val_object["texture_data"].val_object[(texdata.second)+".texture"]=json_value(json_object<json_value>{});
-				itemAtlas.val_object["texture_data"].val_object[(texdata.second)+".texture"].val_object["textures"]=icon;
+				itemAtlas.val_object["texture_data"].val_object[get_iname(identifier)+".texture"]=json_value(json_object<json_value>{});
+				itemAtlas.val_object["texture_data"].val_object[get_iname(identifier)+".texture"].val_object["textures"]=icon;
 			}
 		}
 		if (displayName!=""){
@@ -289,6 +299,42 @@ public:
 			if (recordDuration>=0) item.val_object["minecraft:item"].val_object["components"].val_object["minecraft:record"].val_object["duration"]=recordDuration;
 			if (recordSignal>=0&&recordSignal<=15) item.val_object["minecraft:item"].val_object["components"].val_object["minecraft:record"].val_object["comparator_signal"]=recordSignal;
 		}
-		return item.get_repr();
+		string name;
+		if (identifier!="") name=get_iname(identifier)+".mcaddon";
+		else name="item.mcaddon";
+		json_value p=genManifest();
+		if (itemIcon.filename!=""){
+			itemIcon.filename=truncate_slashes(to_lower(icon)+".png");
+			file zip(name,vector<file>{
+				file("resource",vector<file>{
+					file("manifest.json",p.val_object["rp"].get_repr()),
+					file("textures",vector<file>{
+						file("item_texture.json",itemAtlas.get_repr())
+					}),
+					itemIcon
+				}),
+				file("behavior",vector<file>{
+					file("manifest.json",p.val_object["bp"].get_repr()),
+					file("items",vector<file>{
+						file(get_iname(identifier)+".item.json",item.get_repr())
+					})
+				})
+			});
+			return zip;
+		}
+		else{
+			file zip(name,vector<file>{
+				file("resource",vector<file>{
+					file("manifest.json",p.val_object["rp"].get_repr())
+				}),
+				file("behavior",vector<file>{
+					file("manifest.json",p.val_object["bp"].get_repr()),
+					file("items",vector<file>{
+						file(get_iname(identifier)+".item.json",item.get_repr())
+					})
+				})
+			});
+			return zip;
+		}
 	}
 };

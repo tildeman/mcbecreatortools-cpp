@@ -1,6 +1,8 @@
 #include "item.hpp"
 
 int main(){
+	file tf;
+	tf.read_file("/mnt/ltinh/grumpykenyan.png",1);
 	item a;
 	cout << a.writeItem(
 		"1.17.0",
@@ -73,8 +75,9 @@ int main(){
 		"sluchac",
 		1,
 		4,
+		file("",""),
 		true
-	) << endl;
+	).get_repr() << endl;
 	cout << a.writeItem(
 		"1.16.100",
 		"test:test2",
@@ -146,6 +149,7 @@ int main(){
 		"",
 		-1,
 		-1,
+		tf,
 		false
-	) << endl;
+	).get_repr() << endl;
 }
