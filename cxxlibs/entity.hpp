@@ -125,8 +125,8 @@ public:
 		file jszobject=file("",vector<file>{}); // It's not JS but whatever //
 		string fn;
 		if (verifyIdentifier(identifier)){
-			jszobject.directory_contents.push_back(file("resource_pack",vector<file>{}));
-			if (select=="beh") jszobject.directory_contents[0].directory_contents[0].filename="behavior_pack";
+			if (select=="beh") jszobject.directory_contents.push_back(file("behavior_pack",vector<file>{}));
+			else jszobject.directory_contents.push_back(file("resource_pack",vector<file>{}));
 			if (select=="both") jszobject.directory_contents.push_back(file("behavior_pack",vector<file>{}));
 			json_value manifest=genManifest(select=="both");
 			json_value respack=manifest.val_object["rp"];
