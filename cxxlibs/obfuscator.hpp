@@ -1,17 +1,52 @@
 #include <cstdio>
 #include <string>
 #include <regex>
+#include <iostream>
 
 using namespace std;
 
 class obfuscator{
 public:
+	int decode_utf8(string embestring){
+		// Assume whatever string this function processes is valid UTF8
+		int l=embestring.length(),i=0;
+		unsigned char ccc;
+		ccc=embestring[0];
+		if (ccc>>5==6){
+			i=((unsigned char)(embestring[0])%32)*64+((unsigned char)(embestring[1])%64);
+		}
+		else if (ccc>>4==14){
+			i=((unsigned char)(embestring[0])%16)*4096+((unsigned char)(embestring[1])%64)*64+((unsigned char)(embestring[2])%64);
+		}
+		else if (ccc>>3==30){
+			i=((unsigned char)(embestring[0])%8)*262144+((unsigned char)(embestring[1])%64)*4096+((unsigned char)(embestring[2])%64)*64+((unsigned char)(embestring[3])%64);
+		}
+		else{
+			i=embestring[0];
+		}
+		return i;
+	}
 	string unicodeEscape(string input_string){
 		char escaped_character[7];
 		string output_string;
-		int string_length=input_string.length(),iterator;
+		int string_length=input_string.length(),iterator,cc;
 		for (iterator=0;iterator<string_length;iterator++){
-			sprintf(escaped_character,"\\u%04x",input_string[iterator]);
+			if (((unsigned char)input_string[iterator])>>5==6){
+				cc=decode_utf8(input_string.substr(iterator,2));
+				iterator+=1;
+			}
+			else if (((unsigned char)input_string[iterator])>>4==14){
+				cc=decode_utf8(input_string.substr(iterator,3));
+				iterator+=2;
+			}
+			else if (((unsigned char)input_string[iterator])>>3==30){
+				cc=decode_utf8(input_string.substr(iterator,4));
+				iterator+=3;
+			}
+			else{
+				cc=decode_utf8(input_string.substr(iterator,1));
+			}
+			sprintf(escaped_character,"\\u%04x",cc);
 			output_string+=escaped_character;
 		}
 		return output_string;
