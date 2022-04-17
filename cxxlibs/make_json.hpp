@@ -105,7 +105,7 @@ public:
 						output+="\\\\";
 						break;
 					default:
-						if (this->val_string[i]<32){
+						if (this->val_string[i]>0&&this->val_string[i]<32){
 							sprintf(escape,"\\u%04x",this->val_string[i]);
 							output+=escape;
 						}

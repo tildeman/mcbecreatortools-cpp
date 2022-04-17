@@ -17,7 +17,7 @@ int main(){
 	) << endl;
 	vector<string> r=n.generate_dependent(
 		"abv",
-		"dixneuf",
+		"d🤩ixneuf",
 		vector<json_value> {1,17,0},
 		true,
 		true,

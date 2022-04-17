@@ -27,7 +27,7 @@ public:
 		return i;
 	}
 	string unicodeEscape(string input_string){
-		char escaped_character[7];
+		char escaped_character[10];
 		string output_string;
 		int string_length=input_string.length(),iterator,cc;
 		for (iterator=0;iterator<string_length;iterator++){
