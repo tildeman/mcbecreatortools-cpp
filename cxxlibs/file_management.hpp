@@ -7,7 +7,6 @@
 #include <regex>
 using namespace std;
 typedef basic_string<unsigned char> bstring;
-typedef basic_fstream<unsigned char> bfstream;
 
 // ***************************************
 // * Note to self: use the std namespace *

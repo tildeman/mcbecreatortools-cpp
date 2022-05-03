@@ -2,6 +2,9 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <sstream>
+#include <regex>
+#include <cmath>
 
 using namespace std;
 template <typename jso>
@@ -35,6 +38,79 @@ private:
 			else o+=s[i];
 		}
 		return o;
+	}
+	static string strip(string s){
+		int begin,end;
+		for (begin=0;begin<s.length();begin++){
+			if (!(s[begin]==' '||s[begin]=='\t'||s[begin]=='\n'||s[begin]=='\r')) break;
+		}
+		for (end=s.length()-1;end>-1;end--){
+			if (!(s[end]==' '||s[end]=='\t'||s[end]=='\n'||s[end]=='\r')) break;
+		}
+		if (begin>end) return "";
+		string r=s.substr(begin,end-begin+1);
+		return r;
+	}
+	static int hex_to_int(string s){
+		int l=s.length(),i;
+		int c=-1,r=0;
+		string lookup="0123456789ABCDEF";
+		string lookup_lc="0123456789abcdef";
+		for (i=l-1;i>-1;i--){
+			c=lookup.find(s[i]);
+			if (c==string::npos) c=lookup_lc.find(s[i]);
+			r*=16;
+			r+=c;
+		}
+		return r;
+	}
+	//Kept me up for a whole night
+	static string unescapify(string s){
+		int i,l=s.length();
+		string r;
+		for (i=0;i<l;i++){
+			int p1=0,p2=0;
+			if (s[i]=='\\'){
+				switch (s[i+1]){
+				case '"':
+					r+='"';
+					break;
+				case '\\':
+					r+='\\';
+					break;
+				case '/':
+					r+='/';
+					break;
+				case 'b':
+					r+='\b';
+					break;
+				case 'f':
+					r+='\f';
+					break;
+				case 'n':
+					r+='\n';
+					break;
+				case 'r':
+					r+='\r';
+					break;
+				case 't':
+					r+='\t';
+					break;
+				case 'u':
+					p1=json_value::hex_to_int(s.substr(i+2,4));
+					if (p1>>10==54){
+						r+=(char)((p1%1024)*1024+(json_value::hex_to_int(s.substr(i+8,4))%1024));
+					}
+					break;
+				default:
+					r+=s[i];
+					break;
+				}
+				i++;
+			}
+			else r+=s[i];
+		}
+		return r;
 	}
 public:
 	int val_type;
@@ -137,13 +213,119 @@ public:
 			output+="\n}";
 		}
 		else if (this->val_type==4){
-			if (val_int) output="true";
-			else output="false";
+			switch(val_int){
+				case -1:
+					output="null";
+					break;
+				case 0:
+					output="false";
+					break;
+				case 1:
+					output="true";
+			}
 		}
 		else if (this->val_type==5){
-			output=to_string(val_float);
+			ostringstream scc;
+			scc << val_float;
+			output=scc.str();
 		}
 		output=indent_json(output);
 		return output;
+	}
+	/*
+	A JSON parsing mini-function made by neither JustAsh nor Zarkmend.
+	Refer to RFC 7159 if you want to know more about what this is.
+	I mean it doesn't work on huge numbers but it gets the job done.
+	(as long as Discord doesn't chuck in some impossibly large number)*/
+	static json_value parse(string s){
+		json_value obj=json_value();
+		string to_parse;
+		bool is_parsing;
+		s=json_value::strip(s);
+		int i,l=s.length(),in_list=0,in_object=0;
+		bool in_string=0;
+		if (s[0]=='{'){
+			string name_parse;
+			bool is_parsing_name=1;
+			obj.val_type=3;
+			obj.val_object=json_object<json_value>{};
+			for (i=1;i<l-1;i++){
+				if (s[i]=='"') in_string=!in_string; // Double quotes identify a string
+				if (s[i]=='\\'){ // Escape character, skip a character
+					if (is_parsing_name) name_parse+='\\';
+					else to_parse+='\\';
+					i++;
+				}
+				if (s[i]=='{') in_object++;
+				if (s[i]=='}') in_object--;
+				if (s[i]=='[') in_list++;
+				if (s[i]==']') in_list--;
+				if (s[i]==':'&&in_object==0){
+					is_parsing_name=0;
+					continue;
+				}
+				if (s[i]==','&&in_object==0&&in_list==0){
+					obj.val_object[json_value::parse(name_parse).val_string]=json_value::parse(to_parse);
+					name_parse="";
+					to_parse="";
+					is_parsing_name=1;
+					continue;
+				}
+				if (is_parsing_name) name_parse+=s[i];
+				else to_parse+=s[i];
+			}
+			obj.val_object[json_value::parse(name_parse).val_string]=json_value::parse(to_parse);
+		}
+		if (s[0]=='['){
+			obj.val_type=2;
+			obj.val_list=vector<json_value>{};
+			for (i=1;i<l-1;i++){
+				if (s[i]=='"') in_string=!in_string; // Double quotes identify a string
+				if (s[i]=='\\'){ // Escape character, skip a character
+					to_parse+='\\';
+					i++;
+				}
+				if (s[i]=='{') in_object++;
+				if (s[i]=='}') in_object--;
+				if (s[i]=='[') in_list++;
+				if (s[i]==']') in_list--;
+				if (s[i]==','&&in_object==0&&in_list==0){
+					obj.val_list.push_back(json_value::parse(to_parse));
+					to_parse="";
+					continue;
+				}
+				to_parse+=s[i];
+			}
+			obj.val_list.push_back(json_value::parse(to_parse));
+		}
+		if (s[0]=='\"'){
+			obj.val_type=1;
+			obj.val_string=json_value::unescapify(s.substr(1,s.length()-2));
+		}
+		regex pac_int("(-)?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][-+]?[0-9]+)?");
+		smatch res_pac;
+		if (regex_match(s,res_pac,pac_int)){
+			if (res_pac[3].matched||res_pac[4].matched){
+				obj.val_type=5;
+				obj.val_float=stod(s);
+			}
+			else{
+				obj.val_type=0;
+				obj.val_int=stoi(s);
+			}
+		}
+		if (s=="null"){
+			obj.val_type=4;
+			obj.val_int=-1;
+		}
+		if (s=="true"){
+			obj.val_type=4;
+			obj.val_int=1;
+		}
+		if (s=="false"){
+			obj.val_type=4;
+			obj.val_int=0;
+		}
+		return obj;
 	}
 };

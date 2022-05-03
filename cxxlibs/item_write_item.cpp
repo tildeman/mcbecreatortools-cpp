@@ -2,7 +2,7 @@
 
 int main(){
 	file tf;
-	tf.read_file("/mnt/ltinh/grumpykenyan.png",1);
+	tf.read_file("/mnt/ltinh/młośpąc.png",1);
 	item a;
 	cout << a.writeItem(
 		"1.17.0",
