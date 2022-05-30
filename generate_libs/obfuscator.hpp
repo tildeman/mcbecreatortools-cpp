@@ -1,9 +1,4 @@
-#include <cstdio>
-#include <string>
-#include <regex>
-#include <iostream>
-
-using namespace std;
+namespace generatelibs{
 
 class obfuscator{
 public:
@@ -99,3 +94,5 @@ public:
 		return output_string;
 	}
 };
+
+}

@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(creatortools)
-add_executable (uuid_generator generate_libs/uuid_generator.cpp)
-add_executable (entity generate_libs/entity.cpp)
-add_executable (float_representation generate_libs/float_representation.cpp)
-add_executable (obfuscator generate_libs/obfuscator.cpp)
-add_executable (read_json generate_libs/read_json.cpp)
-add_executable (manifest generate_libs/manifest.cpp)
-add_executable (item generate_libs/item.cpp)
+add_subdirectory(generate_libs)
+add_executable (generate_tests generate_libs/all_in_one_test.cpp)
+target_link_libraries(generate_tests PUBLIC generate_libs)

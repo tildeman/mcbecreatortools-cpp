@@ -1,8 +1,4 @@
-#include "make_json.hpp"
-#include "uuid_generator.hpp"
-#include "file_management.hpp"
-#include <regex>
-
+namespace generatelibs{
 
 class item{
 private:
@@ -338,3 +334,5 @@ public:
 		}
 	}
 };
+
+}

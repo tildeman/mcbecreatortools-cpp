@@ -1,0 +1,1 @@
+add_library (generate_libs generate_libs.cpp)

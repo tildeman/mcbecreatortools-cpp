@@ -25,6 +25,7 @@ typedef basic_string<unsigned char> bstring;
 // |      2      |  Directory |
 // +-------------+------------+
 
+
 class file{
 private:
 	string truncate_slashes(string strink){

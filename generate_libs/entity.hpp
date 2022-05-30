@@ -1,12 +1,9 @@
-#include "make_json.hpp"
-#include "uuid_generator.hpp"
-#include "file_management.hpp"
-#include <regex>
 using namespace std;
 
 // ***********************************
 // * Note to self: don't get lost :) *
 // ***********************************
+namespace generatelibs{
 
 class entity{
 private:
@@ -186,3 +183,5 @@ public:
 		return jszobject;
 	}
 };
+
+}

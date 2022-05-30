@@ -1,10 +1,4 @@
-#include <string>
-#include <vector>
-#include <map>
-#include "uuid_generator.hpp"
-#include "make_json.hpp"
-
-using namespace std;
+namespace generatelibs{
 
 class manifest{
 public:
@@ -186,3 +180,5 @@ public:
 		return vector<string>{behaviorpack.get_repr(),resourcepack.get_repr()};
 	}
 };
+
+}
