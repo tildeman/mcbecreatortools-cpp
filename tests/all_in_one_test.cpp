@@ -1,4 +1,4 @@
-#include "generate_libs.cpp"
+#include <generate_libs.cpp>
 
 using namespace std;
 using namespace generatelibs;
