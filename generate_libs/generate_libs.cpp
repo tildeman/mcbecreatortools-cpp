@@ -1,10 +1,10 @@
 #include <string>
 #include <vector>
 #include <regex>
-#include "make_json.hpp"
-#include "file_management.hpp"
-#include "uuid_generator.hpp"
-#include "item.hpp"
-#include "entity.hpp"
-#include "manifest.hpp"
-#include "obfuscator.hpp"
+#include "make_json.cpp"
+#include "file_management.cpp"
+#include "uuid_generator.cpp"
+#include "item.cpp"
+#include "entity.cpp"
+#include "manifest.cpp"
+#include "obfuscator.cpp"
