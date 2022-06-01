@@ -1,1 +1,1 @@
-add_library (generate_libs generate_libs.cpp)
+add_library (generate_libs SHARED generate_libs.cpp)
