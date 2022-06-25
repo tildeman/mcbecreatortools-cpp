@@ -1,4 +1,6 @@
-using namespace std;
+#include "make_json.h"
+#include "uuid_generator.h"
+#include "file_management.h"
 
 // ***********************************
 // * Note to self: don't get lost :) *

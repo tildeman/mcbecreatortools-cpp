@@ -10,7 +10,7 @@ int main(){
 	entity_tf.read_file("resources/Ę.png",1);
 	entity_mf.read_file("resources/obfuscator_test.json",0);
 	file entity_b=entity_a.make("ss:aa",entity_tf,entity_mf,1,1,0,"#7b3d3d","#ffa8a8","entity_alphatest","","both");
-	string entity_c=entity_b.get_repr();
+	string entity_c=entity_b.get_repr(0);
 	std::cout << entity_c << endl;
 	// test for file_management.hpp
 	file file_a("think",{
@@ -24,7 +24,7 @@ int main(){
 		}),
 		file("must","fffff")
 	});
-	cout << file_a.get_repr() << endl;
+	cout << file_a.get_repr(0) << endl;
 	//test for item.hpp
 
 	file tf;
@@ -103,7 +103,7 @@ int main(){
 		4,
 		file("",""),
 		true
-	).get_repr() << endl;
+	).get_repr(0) << endl;
 	cout << item_a.writeItem(
 		"1.16.100",
 		"test:test2",
@@ -177,7 +177,7 @@ int main(){
 		-1,
 		tf,
 		false
-	).get_repr() << endl;
+	).get_repr(0) << endl;
 	// tests for make_json.hpp
 	json_value float_representation_n=json_value(json_object<json_value>{{{"test",json_value(11.44)},{"test2",json_value(string("car"))}}});
 	cout << float_representation_n.get_repr() << endl;

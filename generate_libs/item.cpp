@@ -1,3 +1,7 @@
+#include "make_json.h"
+#include "uuid_generator.h"
+#include "file_management.h"
+
 namespace generatelibs{
 
 class item{
