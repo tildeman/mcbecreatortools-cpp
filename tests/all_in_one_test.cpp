@@ -24,6 +24,7 @@ int main(){
 		}),
 		file("must","fffff")
 	});
+	cout << "Zip filename: " << entity_b.make_zip() << endl;
 	cout << file_a.get_repr(0) << endl;
 	//test for item.hpp
 

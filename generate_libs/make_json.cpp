@@ -241,11 +241,11 @@ json_value json_value::parse(string s){
 			if (s[i]=='}') in_object--;
 			if (s[i]=='[') in_list++;
 			if (s[i]==']') in_list--;
-			if (s[i]==':'&&in_object==0){
+			if (s[i]==':'&&in_object==0&&is_parsing_name){
 				is_parsing_name=0;
 				continue;
 			}
-			if (s[i]==','&&in_object==0&&in_list==0){
+			if (s[i]==','&&in_object==0&&in_list==0&&in_string==0){
 				obj.val_object[json_value::parse(name_parse).val_string]=json_value::parse(to_parse);
 				name_parse="";
 				to_parse="";
