@@ -40,7 +40,7 @@ private:
 		int l=a.length();
 		string b;
 		for (int i=0;i<l;i++){
-			if (a[i]>64&&a[i]<91) b+=a[i]-32;
+			if (a[i]>64&&a[i]<91) b+=a[i]+32;
 			else b+=a[i];
 		}
 		return b;
@@ -142,10 +142,9 @@ public:
 				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["spawn_egg"].val_object["base_color"]=spawnEggBase;
 			}
 			if (string(textureFile.filename)!=""){
-				textureFile.filename=to_lower(textureFile.filename);
 				string f=strippng(textureFile.filename);
 				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["textures"]=json_value(json_object<json_value>{});
-				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["textures"].val_object["default"]="textures/entity/"+to_lower(f);
+				cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["textures"].val_object["default"]="textures/entity/"+f;
 				if (select!="beh") jszobject.directory_contents[0].directory_contents.push_back(file("textures",vector<file>{file("entity",vector<file>{textureFile})}));
 			}
 			cliententity.val_object["minecraft:client_entity"].val_object["description"].val_object["materials"]=json_value(json_object<json_value>{});

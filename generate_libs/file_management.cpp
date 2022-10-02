@@ -28,6 +28,7 @@ const unsigned char exfl[]={
 	0x01, 0x04, 0xE8, 0x03, 0x00, 0x00, 0x04, 0xE8, 0x03, 0x00, 0x00
 };
 
+zip_fileinfo file::zip_fi;
 
 string file::truncate_slashes(string strink){
 	regex regex_string(".*[\\\\\\/](.+)");
@@ -56,15 +57,15 @@ void file::initialize_zfi(){
 	time_t unixtime=time(NULL);
 	struct tm* current_time=localtime(&unixtime);
 
-	this->zip_fi.dosDate=0;
-	this->zip_fi.external_fa=0;
-	this->zip_fi.internal_fa=0;
-	this->zip_fi.tmz_date.tm_sec=current_time->tm_sec;
-	this->zip_fi.tmz_date.tm_min=current_time->tm_min;
-	this->zip_fi.tmz_date.tm_hour=current_time->tm_hour;
-	this->zip_fi.tmz_date.tm_mday=current_time->tm_mday;
-	this->zip_fi.tmz_date.tm_mon=current_time->tm_mon;
-	this->zip_fi.tmz_date.tm_year=current_time->tm_year;
+	file::zip_fi.dosDate=0;
+	file::zip_fi.external_fa=0;
+	file::zip_fi.internal_fa=0;
+	file::zip_fi.tmz_date.tm_sec=current_time->tm_sec;
+	file::zip_fi.tmz_date.tm_min=current_time->tm_min;
+	file::zip_fi.tmz_date.tm_hour=current_time->tm_hour;
+	file::zip_fi.tmz_date.tm_mday=current_time->tm_mday;
+	file::zip_fi.tmz_date.tm_mon=current_time->tm_mon;
+	file::zip_fi.tmz_date.tm_year=current_time->tm_year;
 }
 void file::read_file(string filename,bool is_binary){
 	if (is_binary){
@@ -104,18 +105,21 @@ void file::write_file(){
 void file::add_files_to_zip(string subdirectory,zipFile* zfptr){
 	switch (this->filetype){
 		case 0:
-			zipOpenNewFileInZip4_64(*zfptr,subdirectory.c_str(),&(this->zip_fi),exfl,15,exfl,15,NULL,0,Z_DEFAULT_COMPRESSION,0,-MAX_WBITS,DEF_MEM_LEVEL,Z_DEFAULT_STRATEGY,NULL,0,798,2048u,1);
-			zipWriteInFileInZip(*zfptr,this->binary_contents.c_str(),this->binary_contents.length());
+			zipOpenNewFileInZip4_64(*zfptr,subdirectory.c_str(),&(file::zip_fi),exfl,15,exfl,15,nullptr,0,Z_DEFAULT_COMPRESSION,0,-MAX_WBITS,DEF_MEM_LEVEL,Z_DEFAULT_STRATEGY,nullptr,0,798,2048u,1);
+			zipWriteInFileInZip(*zfptr,this->binary_contents.data(),this->binary_contents.length());
 			zipCloseFileInZip(*zfptr);
+			break;
 		case 1:
-			zipOpenNewFileInZip4_64(*zfptr,subdirectory.c_str(),&(this->zip_fi),exfl,15,exfl,15,NULL,0,Z_DEFAULT_COMPRESSION,0,-MAX_WBITS,DEF_MEM_LEVEL,Z_DEFAULT_STRATEGY,NULL,0,798,2048u,1);
+			zipOpenNewFileInZip4_64(*zfptr,subdirectory.c_str(),&(file::zip_fi),exfl,15,exfl,15,nullptr,0,Z_DEFAULT_COMPRESSION,0,-MAX_WBITS,DEF_MEM_LEVEL,Z_DEFAULT_STRATEGY,nullptr,0,798,2048u,1);
 			zipWriteInFileInZip(*zfptr,this->text_contents.c_str(),this->text_contents.length());
 			zipCloseFileInZip(*zfptr);
+			break;
 		case 2:
 			for (file i:this->directory_contents){
 				const char* dl="/";
 				i.add_files_to_zip(subdirectory+(dl+(subdirectory.length()==0))+i.filename,zfptr);
 			}
+			break;
 		default:
 			break;
 	}
@@ -126,9 +130,9 @@ string file::make_zip(){
 	uuid_generator u;
 	this->initialize_zfi();
 	filename=string("tmp/")+u.generate_uuid()+".zip";
-	zipFile zfp=zipOpen64(filename.c_str(),0);
+	zipFile zfp=zipOpen(filename.c_str(),0);
 	add_files_to_zip("",&zfp);
-	zipClose(zfp,NULL);
+	zipClose(zfp,nullptr);
 	return filename;
 }
 string file::get_repr(int indent){
