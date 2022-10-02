@@ -28,6 +28,9 @@ const unsigned char exfl[]={
 	0x01, 0x04, 0xE8, 0x03, 0x00, 0x00, 0x04, 0xE8, 0x03, 0x00, 0x00
 };
 
+// External attributes for files
+const long ext_attrs=0644 << 16l;
+
 zip_fileinfo file::zip_fi;
 
 string file::truncate_slashes(string strink){
@@ -58,7 +61,7 @@ void file::initialize_zfi(){
 	struct tm* current_time=localtime(&unixtime);
 
 	file::zip_fi.dosDate=0;
-	file::zip_fi.external_fa=0;
+	file::zip_fi.external_fa=ext_attrs;
 	file::zip_fi.internal_fa=0;
 	file::zip_fi.tmz_date.tm_sec=current_time->tm_sec;
 	file::zip_fi.tmz_date.tm_min=current_time->tm_min;
@@ -105,8 +108,8 @@ void file::write_file(){
 void file::add_files_to_zip(string subdirectory,zipFile* zfptr){
 	switch (this->filetype){
 		case 0:
-			zipOpenNewFileInZip4_64(*zfptr,subdirectory.c_str(),&(file::zip_fi),exfl,15,exfl,15,nullptr,0,Z_DEFAULT_COMPRESSION,0,-MAX_WBITS,DEF_MEM_LEVEL,Z_DEFAULT_STRATEGY,nullptr,0,798,2048u,1);
-			zipWriteInFileInZip(*zfptr,this->binary_contents.data(),this->binary_contents.length());
+			zipOpenNewFileInZip4_64(*zfptr,subdirectory.c_str(),&(file::zip_fi),exfl,15,exfl,15,nullptr,Z_DEFLATED,Z_DEFAULT_COMPRESSION,0,-MAX_WBITS,DEF_MEM_LEVEL,Z_DEFAULT_STRATEGY,nullptr,0,798,2048u,1);
+			zipWriteInFileInZip(*zfptr,this->binary_contents.c_str(),this->binary_contents.length());
 			zipCloseFileInZip(*zfptr);
 			break;
 		case 1:
@@ -125,17 +128,17 @@ void file::add_files_to_zip(string subdirectory,zipFile* zfptr){
 	}
 }
 
-string file::make_zip(){
+string file::make_zip(const char* extension=".zip"){
 	zip_fileinfo zfi;
 	uuid_generator u;
 	this->initialize_zfi();
-	filename=string("tmp/")+u.generate_uuid()+".zip";
+	filename=string("tmp/")+u.generate_uuid()+extension;
 	zipFile zfp=zipOpen(filename.c_str(),0);
 	add_files_to_zip("",&zfp);
 	zipClose(zfp,nullptr);
 	return filename;
 }
-string file::get_repr(int indent){
+string file::get_repr(int indent=0){
 	int i;
 	string s;
 	for (i=1;i<indent;i++) s+="| ";

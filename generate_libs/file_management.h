@@ -60,7 +60,8 @@ class file{
 		// Writes a file to the path given by the instance variable "filename"
 		void write_file();
 		// Creates a .zip file and returns the corresponding filename
-		string make_zip();
+		string make_zip(const char* extension);
+		// Retrieve the string representation of the directory structure
 		string get_repr(int indent);
 };
 
